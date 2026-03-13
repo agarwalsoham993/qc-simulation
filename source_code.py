@@ -1,7 +1,7 @@
-import pygame
+import pygame  # type: ignore
 import random
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.pyplot as plt  # type: ignore
+import numpy as np  # type: ignore
 
 pygame.init()
 
@@ -32,7 +32,7 @@ pygame.display.set_caption("Conway's Game of Life")
 clock = pygame.time.Clock()
 
 # Initializing the grid
-def draw_grid(positions, tile_size):
+def draw_grid(screen, positions, tile_size):
     for position in positions:
         col, row = position
         top_left = (col * tile_size, row * tile_size)
@@ -100,13 +100,13 @@ def adjust_grid(positions):
     return new_positions
 
 def main():
-    global screen, WIDTH, HEIGHT
-    game_active = True
-    simulating = False
-    count = 0
-    update_freq = 60 # Speed control
-    generation_count = 0
-    tile_size = TILE_SIZE
+    global WIDTH, HEIGHT  # type: ignore
+    game_active: bool = True
+    simulating: bool = False
+    count: int = 0
+    update_freq: int = 60 # Speed control
+    generation_count: int = 0
+    tile_size: int = TILE_SIZE
 
     def randomize_positions():
         if SEED:
@@ -118,7 +118,7 @@ def main():
                     new_positions.add((col, row))
         return new_positions
 
-    positions = set()
+    positions: set[tuple[int, int]] = set()
     
     font = pygame.font.SysFont(None, 24)
     button_rect = pygame.Rect(10, 10, 180, 40)
@@ -131,41 +131,45 @@ def main():
     price_plot = None
     plot_active = False
     
-    price_history = []
-    generation_history = []
+    price_history: list[float] = []
+    generation_history: list[int] = []
     
     # Horizon text box variables
-    horizons_text = "1, 3, 5"
-    editing_horizons = False
+    horizons_text: str = "1, 3, 5"
+    editing_horizons: bool = False
     horizons_rect = pygame.Rect(WIDTH - 230, 10, 220, 40)
     
     log_fig = None
-    log_axes = None
-    log_lines = []
-    log_plot_active = False
-    current_horizons = []
+    log_axes: list = []
+    log_lines: list = []
+    log_plot_active: bool = False
+    current_horizons: list[int] = []
     
     def update_log_plot():
         nonlocal log_fig, log_axes, log_lines, log_plot_active, current_horizons
-        if log_plot_active and log_fig and plt.fignum_exists(log_fig.number):
+        if log_plot_active and log_fig and plt.fignum_exists(getattr(log_fig, "number", 0)):
             prices = np.array(price_history)
             prices_safe = np.where(prices == 0, 1e-9, prices)
             logs = np.log(prices_safe)
             
             for i, h in enumerate(current_horizons):
-                if len(logs) > h:
-                    lr = logs[h:] - logs[:-h]
-                    t = generation_history[h:]
-                    log_lines[i].set_data(t, lr)
-                    log_axes[i].relim()
-                    log_axes[i].autoscale_view()
+                h_int = int(h)
+                if len(logs) > h_int:
+                    lr = logs[h_int:] - logs[:-h_int]
+                    t = generation_history[h_int:]
+                    if log_lines is not None and len(log_lines) > i and log_lines[i] is not None:
+                        log_lines[i].set_data(t, lr)  # type: ignore
+                    if log_axes is not None and len(log_axes) > i and log_axes[i] is not None:
+                        log_axes[i].relim()  # type: ignore
+                        log_axes[i].autoscale_view()  # type: ignore
             
             # Using tight layout or just draw
-            log_fig.canvas.draw()
-            try:
-                log_fig.canvas.flush_events()
-            except:
-                pass
+            if hasattr(log_fig, "canvas") and log_fig.canvas is not None:  # type: ignore
+                log_fig.canvas.draw()  # type: ignore
+                try:
+                    log_fig.canvas.flush_events()  # type: ignore
+                except:
+                    pass
         elif log_plot_active:
             log_plot_active = False
     
@@ -176,22 +180,25 @@ def main():
     
     def update_plot():
         nonlocal fig, ax, price_plot, plot_active
-        if plot_active and fig and plt.fignum_exists(fig.number):
-            price_plot.set_data(generation_history, price_history)
-            ax.relim()
-            ax.autoscale_view()
-            fig.canvas.draw()
-            try:
-                fig.canvas.flush_events()
-            except:
-                pass
+        if plot_active and fig and plt.fignum_exists(getattr(fig, "number", 0)):
+            if price_plot is not None:
+                price_plot.set_data(generation_history, price_history)  # type: ignore
+            if ax is not None:
+                ax.relim()  # type: ignore
+                ax.autoscale_view()  # type: ignore
+            if hasattr(fig, "canvas") and fig.canvas is not None:  # type: ignore
+                fig.canvas.draw()  # type: ignore
+                try:
+                    fig.canvas.flush_events()  # type: ignore
+                except:
+                    pass
         elif plot_active:
             plot_active = False
         update_log_plot()
 
     while game_active:
         screen.fill(DEAD)
-        draw_grid(positions, tile_size)
+        draw_grid(screen, positions, tile_size)
         clock.tick(FPS)
         
         # Display generation count and Simulation Status Button
@@ -202,13 +209,13 @@ def main():
         text_rect = ui_text.get_rect(topleft = (10, 10))
         button_rect = text_rect.inflate(10, 10)
         
-        pygame.draw.rect(screen, button_color, button_rect, border_radius = 10)
+        pygame.draw.rect(screen, button_color, button_rect, border_radius=10) # type: ignore
         screen.blit(ui_text, text_rect)
         
         panel_color = (200, 200, 200) if editing_horizons else (100, 100, 100)
         # Ensure we always anchor to the top right dynamically if WIDTH changes (e.g. zoom)
         horizons_rect.x = screen.get_width() - 250
-        pygame.draw.rect(screen, panel_color, horizons_rect, border_radius = 5)
+        pygame.draw.rect(screen, panel_color, horizons_rect, border_radius=5) # type: ignore
         hz_label = font.render(f"Horizons: {horizons_text}", True, ALIVE)
         screen.blit(hz_label, horizons_rect.move(10, 10))
 
@@ -247,9 +254,9 @@ def main():
                     editing_horizons = False
 
                 # Extracting off the position user's clicked cell col, row
-                x, y = event.pos
-                col = x // tile_size
-                row = y // tile_size
+                x, y = event.pos  # type: ignore
+                col = int(x) // int(tile_size)
+                row = int(y) // int(tile_size)
                 pos = (col, row)
                 
                 # Selecting or deselecting user's clicked cell
@@ -301,8 +308,8 @@ def main():
                         log_plot_active = True
                         update_log_plot()
                     else:
-                        if log_fig and plt.fignum_exists(log_fig.number):
-                            plt.close(log_fig)
+                        if log_fig and plt.fignum_exists(getattr(log_fig, "number", 0)):
+                            plt.close(log_fig)  # type: ignore
                         log_plot_active = False
 
                 # Toggle Price Plot
@@ -317,8 +324,8 @@ def main():
                         plot_active = True
                         update_plot()
                     else:
-                        if fig and plt.fignum_exists(fig.number):
-                            plt.close(fig)
+                        if fig and plt.fignum_exists(getattr(fig, "number", 0)):
+                            plt.close(fig)  # type: ignore
                         plot_active = False
                         
                 # Start or pause continous generation advancement
@@ -369,10 +376,12 @@ def main():
         
         # Keep matplotlib GUI responsive
         try:
-            if plot_active and fig and plt.fignum_exists(fig.number):
-                fig.canvas.flush_events()
-            if log_plot_active and log_fig and plt.fignum_exists(log_fig.number):
-                log_fig.canvas.flush_events()
+            if plot_active and fig and plt.fignum_exists(getattr(fig, "number", 0)):
+                if hasattr(fig, "canvas") and getattr(fig, "canvas") is not None:
+                    fig.canvas.flush_events()  # type: ignore
+            if log_plot_active and log_fig and plt.fignum_exists(getattr(log_fig, "number", 0)):
+                if hasattr(log_fig, "canvas") and getattr(log_fig, "canvas") is not None:
+                    log_fig.canvas.flush_events()  # type: ignore
         except:
             pass
 
