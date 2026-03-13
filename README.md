@@ -10,6 +10,9 @@ This project implements Conway's Game of Life in Python, providing an interactiv
 - **Real-time Simulation**: The grid evolves over time based on Conway's rules.
 - **User Input**: Allows the user to manually set the initial configuration of the grid.
 - **Speed Control**: Adjust the simulation speed to view the grid evolution in real time.
+- **Price Architecture**: Real-time tracking of the grid's Center of Mass (CoM) to generate a synthetic "Price" time series.
+- **Dynamic Plotting**: A toggleable matplotlib window to visualize price momentum and shifts.
+
 
 ## Installation
 
@@ -21,11 +24,13 @@ Before running the project, ensure you have Python installed on your system. You
 
 This project requires the following Python libraries:
 - `pygame` - For graphical representation of the grid.
+- `matplotlib` - For real-time plotting of the Center of Mass price data.
+
 
 You can install the required dependencies by running the following command:
 
 ```bash
-pip install pygame
+pip install pygame matplotlib
 ```
 
 ## How to Run the Game

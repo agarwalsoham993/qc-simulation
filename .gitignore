@@ -1,1 +1,4 @@
 venv/
+reference/
+gol_timeseries.pkl
+_pycache__/*
