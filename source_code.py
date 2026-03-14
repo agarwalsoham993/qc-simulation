@@ -61,13 +61,15 @@ def get_neighbors(pos):
     
     return neighbors
 
+# Returning the Center of Mass (CoM) as (avg_x, avg_y)
 def calculate_com(positions):
     if not positions:
-        return 0
-    # Average Y coordinate (invert it so that moving UP the grid means a HIGHER price)
+        return None
+    sum_x = sum(pos[0] for pos in positions)
     sum_y = sum(pos[1] for pos in positions)
+    avg_x = sum_x / len(positions)
     avg_y = sum_y / len(positions)
-    return GRID_HEIGHT - avg_y
+    return (avg_x, avg_y)
 
 # Updating the grid
 def adjust_grid(positions):
@@ -172,9 +174,16 @@ def main():
                     pass
         elif log_plot_active:
             log_plot_active = False
+            price_history = []
+            generation_history = []
+    
+    # Illustration Mode variables
+    illustration_mode = False
+    illus_button_rect = pygame.Rect(10, 60, 180, 40)
     
     # Store initial price
-    current_price = calculate_com(positions)
+    com = calculate_com(positions)
+    current_price = (GRID_HEIGHT - com[1]) if com else 0
     price_history.append(current_price)
     generation_history.append(generation_count)
     
@@ -228,7 +237,8 @@ def main():
                 generation_count += 1
                 
                 # Update Price Plot
-                current_price = calculate_com(positions)
+                com = calculate_com(positions)
+                current_price = (GRID_HEIGHT - com[1]) if com else 0
                 price_history.append(current_price)
                 generation_history.append(generation_count)
                 
@@ -264,6 +274,11 @@ def main():
                     positions.remove(pos)
                 else:
                     positions.add(pos)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if illus_button_rect.collidepoint(event.pos):
+                    illustration_mode = not illustration_mode
+                    continue
             
             if event.type == pygame.KEYDOWN:
                 if editing_horizons:
@@ -339,7 +354,8 @@ def main():
                     count = 0
                     generation_count = 0
                     
-                    price_history = [calculate_com(positions)]
+                    com = calculate_com(positions)
+                    price_history = [(GRID_HEIGHT - com[1]) if com else 0]
                     generation_history = [generation_count]
                     update_plot()
 
@@ -348,7 +364,8 @@ def main():
                     positions = randomize_positions()
                     generation_count = 0
                     
-                    price_history = [calculate_com(positions)]
+                    com = calculate_com(positions)
+                    price_history = [(GRID_HEIGHT - com[1]) if com else 0]
                     generation_history = [generation_count]
                     update_plot()
                 
@@ -357,7 +374,8 @@ def main():
                     positions = adjust_grid(positions)
                     generation_count += 1
                     
-                    price_history.append(calculate_com(positions))
+                    com = calculate_com(positions)
+                    price_history.append((GRID_HEIGHT - com[1]) if com else 0)
                     generation_history.append(generation_count)
                     update_plot()
                 
@@ -372,6 +390,33 @@ def main():
                         tile_size -= 5
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
     
+        # Render Illustration Mode Button and Overlay
+        illus_text = font.render(f"Illustration: {'ON' if illustration_mode else 'OFF'}", True, WHITE)
+        illus_rect_on_screen = illus_text.get_rect(topleft=(10, 60))
+        illus_button_rect = illus_rect_on_screen.inflate(10, 10)
+        btn_color = (41, 128, 185) if illustration_mode else (149, 165, 166)
+        pygame.draw.rect(screen, btn_color, illus_button_rect, border_radius=10)
+        screen.blit(illus_text, illus_text.get_rect(center=illus_button_rect.center))
+
+        if illustration_mode:
+            com = calculate_com(positions)
+            if com:
+                # Com is in grid coordinates, convert to screen coordinates
+                screen_x = com[0] * tile_size + (tile_size // 2)
+                screen_y = com[1] * tile_size + (tile_size // 2)
+                
+                total_cells = GRID_WIDTH * GRID_HEIGHT
+                alive_count = len(positions)
+                radius = int(6 * tile_size * (alive_count / total_cells))
+                
+                # Ensure a minimum visible radius if there are any cells at all
+                if alive_count > 0 and radius < 2:
+                    radius = 3
+                
+                # Draw CoM point and the computed radius circle
+                pygame.draw.circle(screen, (231, 76, 60), (int(screen_x), int(screen_y)), max(radius, 5), 2)
+                pygame.draw.circle(screen, (231, 76, 60), (int(screen_x), int(screen_y)), 3) # Center point
+
         pygame.display.update()
         
         # Keep matplotlib GUI responsive
