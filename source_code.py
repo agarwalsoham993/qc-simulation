@@ -174,8 +174,6 @@ def main():
                     pass
         elif log_plot_active:
             log_plot_active = False
-            price_history = []
-            generation_history = []
     
     # Illustration Mode variables
     illustration_mode = False
