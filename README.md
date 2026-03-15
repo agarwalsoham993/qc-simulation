@@ -6,6 +6,10 @@ Quant CLUB
 
 </div>
 
+The colab.ipynb can be accessed from here 
+
+https://colab.research.google.com/drive/1Zs_ijwo2G7H9sPmNAAayqKZLZhvQ5_xm?usp=sharing
+
 
 This project explores the intersection of **Conway's Game of Life** and **quantitative finance**, investigating whether cellular automaton dynamics can model or provide insights into stock price movements and market behavior. Rather than treating Game of Life as a standalone simulation, we leverage its mathematical properties—particularly the center of mass dynamics—to generate synthetic price signals and compare them with real financial data.
 
