@@ -1,0 +1,7 @@
+pygame  #For interactive grid visualization
+matplotlib #For plotting and analysis
+numpy #For numerical computations
+pandas  #For data manipulation and analysis
+yfinance #For fetching real stock price data
+scipy #For advanced numerical operations (convolution-based GoL)
+plotly #For interactive visualizations (used in the notebook)
